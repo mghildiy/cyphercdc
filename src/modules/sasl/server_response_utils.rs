@@ -4,9 +4,9 @@ use base64::Engine;
 use base64::engine::general_purpose;
 use hmac::{Hmac, Mac};
 use sha2::Sha256;
-use crate::modules::authentication_error::AuthenticationError;
-use crate::modules::authentication_error::AuthenticationError::{ClientKeyGenerationFailed, IllegalState};
-use crate::modules::rsi::Rsi;
+use crate::modules::sasl::authentication_error::AuthenticationError;
+use crate::modules::sasl::authentication_error::AuthenticationError::{ClientKeyGenerationFailed, IllegalState};
+use crate::modules::sasl::rsi::Rsi;
 
 type HmacSha256 = Hmac<Sha256>;
 

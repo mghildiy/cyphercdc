@@ -2,23 +2,29 @@ extern crate core;
 
 mod modules;
 mod config;
+pub mod dto;
 
 use crate::config::CONFIG;
-use modules::stream_utils;
+use modules::sasl::utils;
 use std::io::{Read, Write};
 use std::net::TcpStream;
+use crate::modules::tcp::utils::get_tcp_connection;
+use crate::modules::replication::utils as replication_utils;
 
 fn main() {
     dotenv::dotenv().ok();
+    // sasl authentication
     start_sasl_authentication(&*CONFIG.db_host, CONFIG.db_port.parse().unwrap(), &*CONFIG.db_user);
-
-    //Open a new TCP connection.
-    //  Run the same SASL handshake as before.
-    //Then send START_REPLICATION SLOT ... LOGICAL ....
+    // replication
+    start_replication(&*CONFIG.db_host, CONFIG.db_port.parse().unwrap(), &*CONFIG.db_user)
 }
 
 fn start_sasl_authentication(host: &str, port: u16, user: &str) {
-    stream_utils::sasl_authentication(host, port, user);
+    utils::sasl_authentication(host, port, user);
+}
+
+fn start_replication(host: &str, port: u16, user: &str) {
+    replication_utils::replication(host, port, user);
 }
 
 fn start_replication_step(host: String, port: i32) -> () {

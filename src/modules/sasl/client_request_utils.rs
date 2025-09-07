@@ -5,10 +5,10 @@ use pbkdf2::pbkdf2_hmac;
 use rand::distr::Alphanumeric;
 use rand::{thread_rng, Rng};
 use sha2::{Digest, Sha256};
-use crate::modules::authentication_error::AuthenticationError;
-use crate::modules::authentication_error::AuthenticationError::{ClientKeyGenerationFailed, IllegalState};
-use crate::modules::dto::ClientSecondMessage;
-use crate::modules::rsi::Rsi;
+use crate::modules::sasl::authentication_error::AuthenticationError;
+use crate::modules::sasl::authentication_error::AuthenticationError::{ClientKeyGenerationFailed, IllegalState};
+use crate::modules::sasl::dto::ClientSecondMessage;
+use crate::modules::sasl::rsi::Rsi;
 
 type HmacSha256 = Hmac<Sha256>;
 pub fn prepare_client_second_message(client_first_message: &[u8], mechanism: &str, rsi: &Rsi, password: &str)
