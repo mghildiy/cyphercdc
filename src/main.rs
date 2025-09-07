@@ -1,19 +1,24 @@
-mod modules;
+extern crate core;
 
+mod modules;
+mod config;
+
+use crate::config::CONFIG;
+use modules::stream_utils;
 use std::io::{Read, Write};
 use std::net::TcpStream;
-use modules::db;
-use modules::stream_utils;
 
 fn main() {
-    send_startup_message("localhost", 5432, "cypher_dev");
+    dotenv::dotenv().ok();
+    start_sasl_authentication(&*CONFIG.db_host, CONFIG.db_port.parse().unwrap(), &*CONFIG.db_user);
+
+    //Open a new TCP connection.
+    //  Run the same SASL handshake as before.
+    //Then send START_REPLICATION SLOT ... LOGICAL ....
 }
 
-fn send_startup_message(host: &str, port: u16, user: &str) {
-    let server_addr = format!("{}:{}", host, port);
-    //let mut stream = TcpStream::connect(server_addr).expect("Could not connect to PostgreSQL");
-
-    stream_utils::send_startup_message_and_process_response(host, port, user);
+fn start_sasl_authentication(host: &str, port: u16, user: &str) {
+    stream_utils::sasl_authentication(host, port, user);
 }
 
 fn start_replication_step(host: String, port: i32) -> () {
@@ -31,13 +36,6 @@ fn start_replication_step(host: String, port: i32) -> () {
         println!("Received: {}", received_data);
         bytes_read = stream.read(&mut buffer).expect("Failed to read from stream");
     }
-
-    /*if bytes_read > 0 {
-        let received_data = String::from_utf8_lossy(&buffer[..bytes_read]);
-        println!("Received: {}", received_data);
-    } else {
-        print!("End of stream");
-    }*/
 }
 
 async fn process_replication(client: tokio_postgres::Client) -> () {
