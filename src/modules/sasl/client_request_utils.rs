@@ -5,6 +5,7 @@ use pbkdf2::pbkdf2_hmac;
 use rand::distr::Alphanumeric;
 use rand::{thread_rng, Rng};
 use sha2::{Digest, Sha256};
+use crate::config::CONFIG;
 use crate::modules::sasl::authentication_error::AuthenticationError;
 use crate::modules::sasl::authentication_error::AuthenticationError::{ClientKeyGenerationFailed, IllegalState};
 use crate::modules::sasl::dto::ClientSecondMessage;
@@ -209,6 +210,29 @@ pub fn prepare_handshake_message(user: &str) -> Vec<u8> {
 }
 
 fn prepare_handshake_params(user: &str) -> Vec<u8> {
+    let mut params = Vec::new();
+
+    // user parameter
+    params.extend_from_slice(b"user\0");
+    params.extend_from_slice(user.as_bytes());
+    params.push(0);
+
+    // database parameter
+    params.extend_from_slice(b"database\0");
+    params.extend_from_slice(format!("{}\0",&*CONFIG.db_name).as_bytes());
+
+    // replication = true
+    params.extend_from_slice(b"replication\0");
+    params.extend_from_slice(b"database\0");
+
+    // terminator
+    params.push(0);
+
+    params
+}
+
+
+fn prepare_handshake_params1(user: &str) -> Vec<u8> {
     let mut params = Vec::new();
     params.extend_from_slice(b"user\0");
     params.extend_from_slice(user.as_bytes());

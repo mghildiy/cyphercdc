@@ -11,7 +11,7 @@ use crate::modules::sasl::authentication_error::AuthenticationError;
 use crate::modules::sasl::authentication_error::AuthenticationError::{ConnectionFailed, GenericError, IllegalState, SASLAuthenticationFailed};
 
 pub fn sasl_authentication(host: &str, port: u16, user: &str) -> Result<TcpStream, AuthenticationError> {
-    let mut stream = match get_tcp_connection(host, port) { //connect_to_server(host, port) {
+    let mut stream = match get_tcp_connection(host, port) {
         Ok(strm) => strm,
         Err(e) => {
             eprintln!("Could not connect to PostgreSQL server: {}", e);

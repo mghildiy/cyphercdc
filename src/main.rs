@@ -5,26 +5,31 @@ mod config;
 pub mod dto;
 
 use crate::config::CONFIG;
+use crate::modules::replication::utils as replication_utils;
+use crate::modules::sasl::authentication_error::AuthenticationError;
 use modules::sasl::utils;
 use std::io::{Read, Write};
 use std::net::TcpStream;
-use crate::modules::tcp::utils::get_tcp_connection;
-use crate::modules::replication::utils as replication_utils;
 
 fn main() {
     dotenv::dotenv().ok();
     // sasl authentication
-    start_sasl_authentication(&*CONFIG.db_host, CONFIG.db_port.parse().unwrap(), &*CONFIG.db_user);
+    match start_sasl_authentication(&*CONFIG.db_host, CONFIG.db_port.parse().unwrap(), &*CONFIG.db_user
+    ) {
+        Ok(mut tcpstream) => {
+            start_replication(&mut tcpstream)
+        },
+        Err(error) => eprintln!("{}", error),
+    }
     // replication
-    start_replication(&*CONFIG.db_host, CONFIG.db_port.parse().unwrap(), &*CONFIG.db_user)
 }
 
-fn start_sasl_authentication(host: &str, port: u16, user: &str) {
-    utils::sasl_authentication(host, port, user);
+fn start_sasl_authentication(host: &str, port: u16, user: &str) -> Result<TcpStream, AuthenticationError> {
+    utils::sasl_authentication(host, port, user)
 }
 
-fn start_replication(host: &str, port: u16, user: &str) {
-    replication_utils::replication(host, port, user);
+fn start_replication(tcp_stream: &mut TcpStream) {
+    replication_utils::replication(tcp_stream);
 }
 
 fn start_replication_step(host: String, port: i32) -> () {
